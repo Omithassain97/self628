@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { Client, GatewayIntentBits } = require("discord.js");
+const { Client, GatewayIntentBits, Partials } = require("discord.js");
 
 const client = new Client({
   intents: [
@@ -7,31 +7,33 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent
   ],
+  partials: [Partials.Channel],
 });
 
 let interval = null;
 
 client.on("ready", () => {
-  console.log(`Logged in as ${client.user.tag}`);
+  console.log(`Selfbot logged in as ${client.user.tag}`);
 });
 
 client.on("messageCreate", async (message) => {
   if (message.author.id !== client.user.id) return;
 
-  const content = message.content.toLowerCase();
+  const msg = message.content.trim().toLowerCase();
 
-  if (content === "#start" && !interval) {
+  if (msg === "#start" && !interval) {
+    message.channel.send("Started auto .gacha every 11 seconds...");
     interval = setInterval(() => {
       message.channel.send(".gacha");
-    }, 11000); // Every 11 seconds
-    message.channel.send("Started auto .gacha every 11 seconds.");
+    }, 11000);
   }
 
-  if (content === "#stop" && interval) {
+  if (msg === "#stop" && interval) {
     clearInterval(interval);
     interval = null;
     message.channel.send("Stopped auto .gacha.");
   }
 });
 
+// Important: Do NOT prefix token with "Bot "
 client.login(process.env.TOKEN);
